@@ -1,21 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import * as Yup from "yup";
-import axios from "axios";
 import Swal from "sweetalert2";
-import FeaturesSection from "@/components/sub/company-login/FeaturesSection";
-import RegistrationForm from "@/components/sub/company-login/RegistrationForm";
-
-const emailSchema = Yup.object().shape({
-  email: Yup.string()
-    .email("Email tidak valid")
-    .required("Email harus diisi")
-    .matches(
-      /@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|company\.com)$/,
-      "Email harus menggunakan domain yang valid"
-    ),
-});
+import FeaturesSection from "@/components/company-login/FeaturesSection";
+import RegistrationForm from "@/components/company-login/RegistrationForm";
+import { authCompanyAPI } from "@/services/authCompany";
 
 export default function CompanyRegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,9 +12,7 @@ export default function CompanyRegisterPage() {
   const handleSubmit = async (values: { email: string }) => {
     try {
       setIsLoading(true);
-      const response = await axios.post("/api/auth/company/register", {
-        email: values.email,
-      });
+      await authCompanyAPI.register(values.email);
 
       Swal.fire({
         title: "Pendaftaran Berhasil!",
@@ -33,14 +20,22 @@ export default function CompanyRegisterPage() {
         icon: "success",
         confirmButtonColor: "#0ea5e9",
       });
-    } catch (error: any) {
-      Swal.fire({
-        title: "Pendaftaran Gagal",
-        text:
-          error.response?.data?.message || "Terjadi kesalahan saat mendaftar",
-        icon: "error",
-        confirmButtonColor: "#0ea5e9",
-      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        Swal.fire({
+          title: "Pendaftaran Gagal",
+          text: error.message || "Terjadi kesalahan saat mendaftar",
+          icon: "error",
+          confirmButtonColor: "#0ea5e9",
+        });
+      } else {
+        Swal.fire({
+          title: "Pendaftaran Gagal",
+          text: "Terjadi kesalahan saat mendaftar",
+          icon: "error",
+          confirmButtonColor: "#0ea5e9",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +66,7 @@ export default function CompanyRegisterPage() {
 
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             <FeaturesSection />
-            <RegistrationForm />
+            <RegistrationForm onSubmit={handleSubmit} isLoading={isLoading} />
           </div>
         </div>
       </div>

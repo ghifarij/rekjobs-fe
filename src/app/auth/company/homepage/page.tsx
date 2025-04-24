@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect } from "react";
-import HeroSection from "@/components/sub/company-login/HeroSection";
-import BenefitsSection from "@/components/sub/company-login/BenefitsSection";
+import HeroSection from "@/components/company-login/HeroSection";
+import BenefitsSection from "@/components/company-login/BenefitsSection";
 
 const CompanyHomePage = () => {
   useEffect(() => {

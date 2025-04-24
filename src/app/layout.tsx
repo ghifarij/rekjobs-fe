@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/main/navbar/Navbar";
+import Navbar from "@/components/navbar/Navbar";
 import Script from "next/script";
 import { SessionProvider } from "@/context/sessionProvider";
 

@@ -3,17 +3,16 @@
 import { useState } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { FaTimes } from "react-icons/fa";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
-import SocialLogin from "@/components/main/register/SocialLogin";
-import { authAPI } from "@/services/api";
+import SocialLogin from "@/components/register/SocialLogin";
+import { authAPI } from "@/services/authUser";
 
 // Validation schema
 const RegisterSchema = Yup.object().shape({
-  email: Yup.string().email("Email tidak valid").required("Email diperlukan"),
+  email: Yup.string().email("Email tidak valid").required("Email harus diisi"),
 });
 
 // Form values type
@@ -42,17 +41,28 @@ export default function RegisterUser() {
         confirmButtonText: "OK",
         confirmButtonColor: "#0ea5e9", // sky-500
       });
-    } catch (error: any) {
-      setAlertMessage(error.message || "Terjadi kesalahan saat mendaftar");
-      Swal.fire({
-        title: "Pendaftaran Gagal",
-        text:
-          error.message ||
-          "Terjadi kesalahan saat mendaftar. Silakan coba lagi.",
-        icon: "error",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#0ea5e9", // sky-500
-      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setAlertMessage(error.message || "Terjadi kesalahan saat mendaftar");
+        Swal.fire({
+          title: "Pendaftaran Gagal",
+          text:
+            error.message ||
+            "Terjadi kesalahan saat mendaftar. Silakan coba lagi.",
+          icon: "error",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#0ea5e9", // sky-500
+        });
+      } else {
+        setAlertMessage("Terjadi kesalahan saat mendaftar");
+        Swal.fire({
+          title: "Pendaftaran Gagal",
+          text: "Terjadi kesalahan saat mendaftar. Silakan coba lagi.",
+          icon: "error",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#0ea5e9", // sky-500
+        });
+      }
     } finally {
       setIsLoading(false);
     }

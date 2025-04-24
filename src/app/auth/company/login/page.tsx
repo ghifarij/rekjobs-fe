@@ -1,45 +1,54 @@
 "use client";
 
 import { useState } from "react";
-import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
-import axios from "axios";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import Swal from "sweetalert2";
-import { Mail, Lock } from "lucide-react";
-import Image from "next/image";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import SocialLoginCompany from "@/components/main/register/SocialLoginCompany";
-
-const loginSchema = Yup.object().shape({
-  email: Yup.string().email("Email tidak valid").required("Email harus diisi"),
-  password: Yup.string()
-    .min(8, "Password minimal 8 karakter")
-    .required("Password harus diisi"),
-});
+import SocialLoginCompany from "@/components/register/SocialLoginCompany";
+import { LoginFormValues, LoginSchema } from "@/libs/validationSchema";
+import { useRouter } from "next/navigation";
+import { authCompanyAPI } from "@/services/authCompany";
+import { useSession } from "@/context/useSessionHook";
 
 export default function CompanyLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const { setToken } = useSession();
 
-  const handleSubmit = async (values: { email: string; password: string }) => {
+  const handleSubmit = async (values: LoginFormValues) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const response = await axios.post("/api/auth/company/login", values);
+      const result = await authCompanyAPI.login(values.email, values.password);
+
+      // Store the token and update session
+      setToken(result.token, true);
 
       Swal.fire({
         title: "Login Berhasil!",
-        text: "Anda akan diarahkan ke dashboard",
+        text: "Selamat datang kembali di RekJobs",
         icon: "success",
         confirmButtonColor: "#0ea5e9",
       }).then(() => {
-        window.location.href = "/company/dashboard";
+        router.push("/company/dashboard");
       });
-    } catch (error: any) {
-      Swal.fire({
-        title: "Login Gagal",
-        text: error.response?.data?.message || "Email atau password salah",
-        icon: "error",
-        confirmButtonColor: "#0ea5e9",
-      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        Swal.fire({
+          title: "Login Gagal",
+          text: error.message || "Email atau password salah",
+          icon: "error",
+          confirmButtonColor: "#0ea5e9",
+        });
+      } else {
+        Swal.fire({
+          title: "Login Gagal",
+          text: "Terjadi kesalahan saat login",
+          icon: "error",
+          confirmButtonColor: "#0ea5e9",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -69,10 +78,10 @@ export default function CompanyLoginPage() {
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-sky-100">
             <Formik
               initialValues={{ email: "", password: "" }}
-              validationSchema={loginSchema}
+              validationSchema={LoginSchema}
               onSubmit={handleSubmit}
             >
-              {({ errors, touched }) => (
+              {() => (
                 <Form className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-sky-700 mb-1">
@@ -88,12 +97,12 @@ export default function CompanyLoginPage() {
                         className="block w-full pl-10 pr-3 py-3 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all duration-200 outline-none"
                         placeholder="Masukkan email perusahaan"
                       />
-                      {touched.email && errors.email && (
-                        <div className="text-sm text-red-500">
-                          {errors.email}
-                        </div>
-                      )}
                     </div>
+                    <ErrorMessage
+                      name="email"
+                      component="div"
+                      className="text-red-500 text-sm mt-1"
+                    />
                   </div>
 
                   <div>
@@ -105,17 +114,28 @@ export default function CompanyLoginPage() {
                         <Lock className="h-5 w-5 text-sky-400" />
                       </div>
                       <Field
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         name="password"
                         className="block w-full pl-10 pr-3 py-3 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all duration-200 outline-none"
                         placeholder="Masukkan password"
                       />
-                      {touched.password && errors.password && (
-                        <div className="text-sm text-red-500">
-                          {errors.password}
-                        </div>
-                      )}
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-3 flex items-center"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5 text-sky-400" />
+                        ) : (
+                          <Eye className="h-5 w-5 text-sky-400" />
+                        )}
+                      </button>
                     </div>
+                    <ErrorMessage
+                      name="password"
+                      component="div"
+                      className="text-red-500 text-sm mt-1"
+                    />
                   </div>
 
                   <div className="flex items-center justify-between">

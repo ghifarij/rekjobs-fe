@@ -1,33 +1,76 @@
 "use client";
 
 import { CheckCircle } from "lucide-react";
-import VerifyCompanyForm from "@/components/sub/company-login/VerifyCompanyForm";
+import VerifyCompanyForm from "@/components/company-login/VerifyCompanyForm";
+import { use, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
+import { authCompanyAPI } from "@/services/authCompany";
 
 export default function VerifyCompanyPage({
   params,
 }: {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }) {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-sky-100 py-12 px-4 sm:px-6 lg:px-8">
-      {/* Decorative Elements */}
-      <div className="absolute top-0 left-0 right-0 h-64 overflow-hidden">
-        <div className="absolute inset-0 bg-sky-600 opacity-5">
-          <svg className="absolute bottom-0" viewBox="0 0 1440 320">
-            <path
-              fill="currentColor"
-              d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
-            ></path>
-          </svg>
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const { token } = use(params);
+
+  useEffect(() => {
+    const checkVerificationStatus = async () => {
+      if (!token) {
+        Swal.fire({
+          title: "Error",
+          text: "Token verifikasi tidak valid",
+          icon: "error",
+          confirmButtonColor: "#0ea5e9",
+        }).then(() => {
+          router.push("/");
+        });
+        return;
+      }
+
+      try {
+        const result = await authCompanyAPI.checkVerificationStatus(token);
+
+        if (result.isVerified) {
+          Swal.fire({
+            title: "Akun Sudah Terverifikasi",
+            text: "Akun perusahaan Anda sudah terverifikasi sebelumnya. Anda akan diarahkan ke halaman utama.",
+            icon: "info",
+            confirmButtonColor: "#0ea5e9",
+          }).then(() => {
+            router.push("/company/dashboard");
+          });
+        }
+      } catch (error) {
+        console.error("Error checking verification status:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkVerificationStatus();
+  }, [token, router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg border-2 border-sky-500">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500 mx-auto"></div>
+            <p className="mt-4 text-sky-600">Memeriksa status verifikasi...</p>
+          </div>
         </div>
       </div>
+    );
+  }
 
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-sky-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto relative">
         {/* Verification Progress */}
         <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-sky-100 mb-4">
-            <CheckCircle className="w-8 h-8 text-sky-600" />
-          </div>
           <h2 className="text-3xl font-bold text-sky-900">
             Verifikasi Akun Perusahaan
           </h2>
@@ -37,7 +80,7 @@ export default function VerifyCompanyPage({
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-sky-100">
-          <VerifyCompanyForm token={params.token} />
+          <VerifyCompanyForm token={token} />
         </div>
 
         {/* Security Notice */}

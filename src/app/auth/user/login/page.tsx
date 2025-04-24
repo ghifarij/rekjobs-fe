@@ -6,41 +6,29 @@ import { FaTimes } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-import * as Yup from "yup";
 import Swal from "sweetalert2";
-import SocialLogin from "@/components/main/register/SocialLogin";
+import SocialLogin from "@/components/register/SocialLogin";
 import { useRouter } from "next/navigation";
-import { authAPI } from "@/services/api";
-
-// Validation schema
-const LoginSchema = Yup.object().shape({
-  email: Yup.string().email("Email tidak valid").required("Email diperlukan"),
-  password: Yup.string()
-    .min(6, "Password minimal 6 karakter")
-    .required("Password diperlukan"),
-});
-
-// Form values type
-interface FormValues {
-  email: string;
-  password: string;
-}
+import { authAPI } from "@/services/authUser";
+import { useSession } from "@/context/useSessionHook";
+import { LoginFormValues, LoginSchema } from "@/libs/validationSchema";
 
 export default function LoginUser() {
   const [isLoading, setIsLoading] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const { setToken } = useSession();
 
-  const handleSubmit = async (values: FormValues) => {
+  const handleSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
     setAlertMessage(null);
 
     try {
       const result = await authAPI.login(values.email, values.password);
 
-      // Store the token
-      localStorage.setItem("token", result.token);
+      // Store the token and update session
+      setToken(result.token);
 
       // Show success message
       await Swal.fire({
@@ -52,17 +40,28 @@ export default function LoginUser() {
       });
 
       // Redirect to dashboard
-      router.push("/dashboard");
-    } catch (error: any) {
-      setAlertMessage(error.message || "Terjadi kesalahan saat login");
-      Swal.fire({
-        title: "Login Gagal",
-        text:
-          error.message || "Terjadi kesalahan saat login. Silakan coba lagi.",
-        icon: "error",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#0ea5e9", // sky-500
-      });
+      router.push("/jobs");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setAlertMessage(error.message || "Terjadi kesalahan saat login");
+        Swal.fire({
+          title: "Login Gagal",
+          text:
+            error.message || "Terjadi kesalahan saat login. Silakan coba lagi.",
+          icon: "error",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#0ea5e9", // sky-500
+        });
+      } else {
+        setAlertMessage("Terjadi kesalahan saat login");
+        Swal.fire({
+          title: "Login Gagal",
+          text: "Terjadi kesalahan saat login. Silakan coba lagi.",
+          icon: "error",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#0ea5e9", // sky-500
+        });
+      }
     } finally {
       setIsLoading(false);
     }
