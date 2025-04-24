@@ -142,7 +142,7 @@ export default function LoginUser() {
                 </div>
 
                 <Link
-                  href="/auth/user/login/forgot-password"
+                  href="/auth/user/forgot-password"
                   className="text-sm text-sky-500 hover:underline"
                 >
                   Lupa password?

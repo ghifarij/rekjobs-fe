@@ -6,7 +6,7 @@ import { useFormik, FormikProps } from "formik";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { jobAPI } from "@/services/job";
-import { JobFormValues, jobValidationSchema } from "@/lib/validationSchema";
+import { JobFormValues, jobValidationSchema } from "@/libs/jobValidationSchema";
 import RichTextEditor from "@/components/rich-text-editor/RichTextEditor";
 import withAuthGuard from "@/hoc/withAuthGuard";
 import { JobType, ExperienceLevel } from "@/types/job";

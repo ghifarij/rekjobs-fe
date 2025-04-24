@@ -169,13 +169,13 @@ function JobsPage() {
 
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
         {/* Left: Job List */}
-        <div className="w-full lg:w-1/3 bg-white rounded-lg shadow-sm">
+        <div className="w-full lg:w-1/3 bg-white">
           <div className="p-3 sm:p-4">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
               Lowongan Untukmu
             </h2>
           </div>
-          <div className="overflow-y-auto max-h-[60vh] sm:max-h-[70vh]">
+          <div className="overflow-y-auto max-h-[80vh] sm:max-h-[100vh]">
             {jobs.length === 0 ? (
               <div className="p-4 text-gray-500 text-center text-sm sm:text-base">
                 Tidak ada lowongan yang ditemukan.
