@@ -43,10 +43,10 @@ export const companyApplicationAPI = {
   // Get a single application by ID
   getApplicationById: async (applicationId: number): Promise<Application> => {
     try {
-      const response = await api.get<Application>(
+      const response = await api.get<{ details: Application }>(
         `/applications/company/${applicationId}`
       );
-      return response.data;
+      return response.data.details;
     } catch (error) {
       console.error(
         "Error fetching application:",

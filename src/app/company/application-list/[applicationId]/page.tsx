@@ -34,13 +34,10 @@ function ApplicationDetailPage() {
   const fetchApplication = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await companyApplicationAPI.getApplicationById(
+      const details = await companyApplicationAPI.getApplicationById(
         Number(applicationId)
       );
-      setApplication({
-        ...data,
-        user: data.applicant,
-      });
+      setApplication(details);
     } catch (e) {
       console.error(e);
     } finally {
@@ -56,7 +53,7 @@ function ApplicationDetailPage() {
   if (!application) {
     return (
       <div className="container max-w-5xl mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto text-center text-red-500">
+        <div className="flex flex-col items-center justify-center max-w-3xl mx-auto text-center text-red-500">
           Lowongan tidak ditemukan
           <button
             onClick={() => router.back()}
@@ -69,7 +66,14 @@ function ApplicationDetailPage() {
     );
   }
 
-  const { status, interviews, user, coverLetter, resume } = application;
+  const {
+    status,
+    interviews = [],
+    applicant,
+    coverLetter,
+    resume,
+  } = application;
+
   const hasInterview = interviews.length > 0;
 
   const handleStatus = async (newStatus: "PROCESSING" | "REJECTED") => {
@@ -257,11 +261,11 @@ function ApplicationDetailPage() {
 
         <div className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
-            <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border">
-              {user.avatar ? (
+            <div className="relative w-24 h-24 sm:w-32 sm:h-40 overflow-hidden border">
+              {applicant.avatar ? (
                 <Image
-                  src={user.avatar}
-                  alt={user.name}
+                  src={applicant.avatar}
+                  alt={applicant.name}
                   fill
                   className="object-cover"
                 />
@@ -272,11 +276,15 @@ function ApplicationDetailPage() {
               )}
             </div>
             <div className="text-center sm:text-left">
-              <h2 className="text-xl sm:text-2xl font-bold">{user.name}</h2>
-              <p className="text-gray-600 text-sm sm:text-base">{user.email}</p>
-              {user.phone && (
+              <h2 className="text-xl sm:text-2xl font-bold">
+                {applicant.name}
+              </h2>
+              <p className="text-gray-600 text-sm sm:text-base">
+                {applicant.email}
+              </p>
+              {applicant.phone && (
                 <p className="text-gray-600 mt-1 text-sm sm:text-base">
-                  {user.phone}
+                  {applicant.phone}
                 </p>
               )}
             </div>
@@ -285,10 +293,10 @@ function ApplicationDetailPage() {
 
         <section className="p-4 sm:p-6">
           <h3 className="text-lg sm:text-xl font-semibold mb-3">Tentang</h3>
-          {user.bio ? (
+          {applicant.bio ? (
             <div
               className="prose max-w-none text-sm sm:text-base"
-              dangerouslySetInnerHTML={{ __html: user.bio }}
+              dangerouslySetInnerHTML={{ __html: applicant.bio }}
             />
           ) : (
             <p className="italic text-gray-500 text-sm sm:text-base">
@@ -299,9 +307,9 @@ function ApplicationDetailPage() {
 
         <section className="p-4 sm:p-6">
           <h3 className="text-lg sm:text-xl font-semibold mb-3">Skills</h3>
-          {user.skills?.length ? (
+          {applicant.skills?.length ? (
             <div className="flex flex-wrap gap-2">
-              {user.skills.map((s) => (
+              {applicant.skills.map((s) => (
                 <span
                   key={s}
                   className="px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs sm:text-sm"
@@ -322,9 +330,9 @@ function ApplicationDetailPage() {
             <h3 className="text-lg sm:text-xl font-semibold mb-3">
               Pengalaman Kerja
             </h3>
-            {user.experience?.length ? (
+            {applicant.experience?.length ? (
               <div className="space-y-4">
-                {user.experience.map((exp, i) => (
+                {applicant.experience.map((exp, i) => (
                   <div key={i} className="border-l-4 border-sky-500 pl-4">
                     <h4 className="font-semibold text-sm sm:text-base">
                       {exp.title}
@@ -353,9 +361,9 @@ function ApplicationDetailPage() {
             <h3 className="text-lg sm:text-xl font-semibold mb-3">
               Pendidikan
             </h3>
-            {user.education?.length ? (
+            {applicant.education?.length ? (
               <div className="space-y-4">
-                {user.education.map((ed, i) => (
+                {applicant.education.map((ed, i) => (
                   <div key={i} className="border-l-4 border-sky-500 pl-4">
                     <h4 className="font-semibold text-sm sm:text-base">
                       {ed.degree} in {ed.field}
