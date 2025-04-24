@@ -23,9 +23,9 @@ export default function CompanyLoginPage() {
       const result = await authCompanyAPI.login(values.email, values.password);
 
       // Store the token and update session
-      setToken(result.token, true);
+      await setToken(result.token, true);
 
-      Swal.fire({
+      await Swal.fire({
         title: "Login Berhasil!",
         text: "Selamat datang kembali di RekJobs",
         icon: "success",

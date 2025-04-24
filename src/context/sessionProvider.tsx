@@ -69,7 +69,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
     setCompany(null);
   }, []);
 
-  const checkSession = useCallback(async () => {
+  const checkSession = useCallback(async (): Promise<void> => {
+    setLoading(true);
     try {
       // only proceed if a token exists
       if (
@@ -138,7 +139,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
   }, [resetSession]);
 
   const setToken = useCallback(
-    (token: string, isCompany: boolean = false) => {
+    async (token: string, isCompany: boolean = false): Promise<void> => {
       if (isCompany) {
         localStorage.setItem("companyToken", token);
         localStorage.removeItem("token");
@@ -146,7 +147,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
         localStorage.setItem("token", token);
         localStorage.removeItem("companyToken");
       }
-      checkSession();
+      await checkSession();
     },
     [checkSession]
   );
