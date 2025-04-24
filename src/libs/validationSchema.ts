@@ -108,3 +108,16 @@ export interface LoginFormValues {
   email: string;
   password: string;
 }
+
+export const forgotPasswordSchema = Yup.object().shape({
+  email: Yup.string().email("Email tidak valid").required("Email harus diisi"),
+});
+
+export const resetPasswordSchema = Yup.object().shape({
+  password: Yup.string()
+    .min(8, "Password minimal 8 karakter")
+    .required("Password harus diisi"),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password")], "Password tidak cocok")
+    .required("Konfirmasi password harus diisi"),
+});

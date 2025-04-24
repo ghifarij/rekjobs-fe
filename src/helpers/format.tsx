@@ -22,10 +22,16 @@ export const formatCurrency = (
   locale = "id-ID",
   currency = "IDR"
 ): string => {
+  // If the value is a string that can't be parsed into a number, return it as is
+  if (typeof value === "string" && isNaN(parseFloat(value))) {
+    return value;
+  }
+
   const amount = typeof value === "string" ? parseFloat(value) : value;
   if (isNaN(amount)) {
-    throw new Error("Invalid number provided for currency formatting.");
+    return "—";
   }
+
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
