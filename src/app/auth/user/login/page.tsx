@@ -28,7 +28,7 @@ export default function LoginUser() {
       const result = await authAPI.login(values.email, values.password);
 
       // Store the token and update session
-      setToken(result.token);
+      await setToken(result.token);
 
       // Show success message
       await Swal.fire({

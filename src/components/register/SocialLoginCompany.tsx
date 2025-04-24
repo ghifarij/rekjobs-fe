@@ -78,7 +78,7 @@ const SocialLoginCompany = () => {
               });
 
               // Use setToken to update session context with isCompany=true
-              setToken(result.token, true);
+              await setToken(result.token, true);
 
               // Show success message
               await Swal.fire({

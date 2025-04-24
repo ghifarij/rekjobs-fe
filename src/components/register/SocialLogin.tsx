@@ -78,7 +78,7 @@ const SocialLogin = () => {
               });
 
               // Use setToken to update session context and store the token
-              setToken(result.token, false);
+              await setToken(result.token, false);
 
               // Show success message
               await Swal.fire({
