@@ -102,7 +102,7 @@ function ApplicationListPage() {
 
                 {/* Lowongan */}
                 <td className="px-3 sm:px-4 py-4 whitespace-normal break-words text-sm text-gray-900">
-                  <div className="font-medium">Job ID: {app.jobId}</div>
+                  <div className="font-medium">{app.job.title}</div>
                   <div className="text-xs text-gray-500 sm:hidden">
                     {app.applicant.name}
                   </div>

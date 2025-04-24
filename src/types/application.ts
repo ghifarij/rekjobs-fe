@@ -86,11 +86,18 @@ export interface ApplicationDetails {
   status: ApplicationStatus;
   coverLetter?: string;
   resume?: string;
+  job: {
+    id: number;
+    title: string;
+    slug: string;
+  };
   interviews: {
     id: number;
+    scheduledAt: string;
     status: InterviewStatus;
+    notes?: string;
   }[];
-  user: {
+  applicant: {
     id: number;
     name: string;
     email: string;
