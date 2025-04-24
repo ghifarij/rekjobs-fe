@@ -159,4 +159,7 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default withAuthGuard(Dashboard, { requiredRole: "company" });
+export default withAuthGuard(Dashboard, {
+  requiredRole: "company",
+  redirectTo: "/auth/company/login",
+});

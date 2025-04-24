@@ -24,6 +24,7 @@ export default function withAuthGuard<P extends object>(
     const router = useRouter();
 
     useEffect(() => {
+      // Only check auth state when loading is complete
       if (!loading) {
         const currentRoute = window.location.pathname;
 
@@ -50,16 +51,17 @@ export default function withAuthGuard<P extends object>(
       }
     }, [isAuth, loading, type, router]);
 
-    // Show loading state
+    // Show loading state while checking auth
     if (loading) {
       return <Loading />;
     }
 
-    // Don't render if not authenticated or wrong role
-    if (!isAuth || (requiredRole && type !== requiredRole)) {
-      return null;
+    // Only render the component if we're authenticated and have the correct role
+    if (isAuth && (!requiredRole || type === requiredRole)) {
+      return <Component {...props} />;
     }
 
-    return <Component {...props} />;
+    // Don't render anything while we're waiting for auth state to be determined
+    return null;
   };
 }
