@@ -58,6 +58,7 @@ function EditProfilePage() {
     phone: profile.phone || "",
     bio: profile.bio || "",
     skills: profile.skills,
+    avatar: profile.avatar || "",
     experience: profile.experience.map((e) => ({
       id: e.id,
       title: e.title,
@@ -86,8 +87,19 @@ function EditProfilePage() {
   ) => {
     setSubmitting(true);
     try {
+      // Convert skills string to array if it's a string
+      const updateData = {
+        ...values,
+        skills: Array.isArray(values.skills)
+          ? values.skills
+          : (values.skills || "")
+              .split(",")
+              .map((s: string) => s.trim())
+              .filter((s: string) => s !== ""),
+      };
+
       // call the service instead of raw fetch
-      await userAPI.updateProfile(values);
+      await userAPI.updateProfile(updateData);
 
       // await the alert so you see it
       await Swal.fire({

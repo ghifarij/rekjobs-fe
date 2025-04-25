@@ -52,7 +52,14 @@ export const userProfileValidationSchema = Yup.object().shape({
   name: Yup.string().required("Name is required"),
   phone: Yup.string().optional(),
   bio: Yup.string().nullable(),
-  skills: Yup.array().of(Yup.string()).optional(),
+  skills: Yup.mixed().test(
+    "is-array",
+    "Skills must be an array",
+    function (value) {
+      if (!value) return true;
+      return Array.isArray(value) || typeof value === "string";
+    }
+  ),
   experience: Yup.array()
     .of(
       Yup.object().shape({

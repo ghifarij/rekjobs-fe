@@ -4,7 +4,20 @@ export type JobType =
   | "CONTRACT"
   | "INTERNSHIP"
   | "REMOTE";
-export type ExperienceLevel = "ENTRY" | "MID" | "SENIOR" | "EXPERT";
+
+export enum ExperienceLevel {
+  ENTRY_LEVEL = "Entry Level",
+  MID_LEVEL = "Mid Level",
+  SENIOR_LEVEL = "Senior Level",
+  EXPERT_LEVEL = "Expert Level",
+}
+
+export const EXPERIENCE_LEVELS = [
+  ExperienceLevel.ENTRY_LEVEL,
+  ExperienceLevel.MID_LEVEL,
+  ExperienceLevel.SENIOR_LEVEL,
+  ExperienceLevel.EXPERT_LEVEL,
+] as const;
 
 export interface Job {
   id: number;
