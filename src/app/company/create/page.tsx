@@ -9,7 +9,7 @@ import { jobAPI } from "@/services/job";
 import { JobFormValues, jobValidationSchema } from "@/libs/jobValidationSchema";
 import RichTextEditor from "@/components/rich-text-editor/RichTextEditor";
 import withAuthGuard from "@/hoc/withAuthGuard";
-import { JobType, ExperienceLevel } from "@/types/job";
+import { JobType, ExperienceLevel, EXPERIENCE_LEVELS } from "@/types/job";
 
 const JobForm: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -23,7 +23,7 @@ const JobForm: React.FC = () => {
       requirements: "",
       salary: "",
       jobType: "FULL_TIME" as JobType,
-      experience: "ENTRY" as ExperienceLevel,
+      experience: "Entry Level" as ExperienceLevel,
       deadline: "",
     },
     validationSchema: jobValidationSchema,
@@ -185,11 +185,18 @@ const JobForm: React.FC = () => {
                   {...formik.getFieldProps("experience")}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm sm:text-base"
                 >
-                  <option value="ENTRY">Entry Level</option>
-                  <option value="MID">Mid Level</option>
-                  <option value="SENIOR">Senior Level</option>
-                  <option value="EXPERT">Expert Level</option>
+                  <option value="">Pilih Level Pengalaman</option>
+                  {EXPERIENCE_LEVELS.map((level) => (
+                    <option key={level} value={level}>
+                      {level}
+                    </option>
+                  ))}
                 </select>
+                {formik.touched.experience && formik.errors.experience && (
+                  <div className="text-red-500 text-xs sm:text-sm mt-1">
+                    {formik.errors.experience}
+                  </div>
+                )}
               </div>
 
               {/* Deadline */}

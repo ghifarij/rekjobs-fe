@@ -64,11 +64,3 @@ export interface UserProfileUpdate {
     description?: string;
   }>;
 }
-
-export interface BasicInformationFormValues {
-  name: string;
-  email: string;
-  phone?: string;
-  bio?: string;
-  skills?: string[];
-}

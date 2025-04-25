@@ -29,6 +29,7 @@ function EditCompanyProfilePage() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [noWebsite, setNoWebsite] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Company size options
   const companySizes = [
@@ -82,16 +83,48 @@ function EditCompanyProfilePage() {
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    if (!e.target.files || !e.target.files[0]) return;
+
+    const file = e.target.files[0];
+
+    // Validate file type
+    const validTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/svg+xml",
+    ];
+    if (!validTypes.includes(file.type)) {
+      setError(
+        "Silahkan unggah file gambar yang valid (JPG, JPEG, PNG, atau SVG)"
+      );
+      return;
+    }
+
+    // Validate file size (1MB)
+    if (file.size > 1024 * 1024) {
+      setError("Ukuran file harus kurang dari 1MB");
+      return;
+    }
+
+    setError(null);
+    setIsUploading(true);
+
+    try {
       setLogoFile(file);
 
       // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setLogoPreview(reader.result as string);
+        setIsUploading(false);
       };
       reader.readAsDataURL(file);
+    } catch (err) {
+      console.error(err);
+      setError("Gagal memproses logo. Silahkan coba lagi.");
+      setLogoPreview(profile?.logo || null);
+      setIsUploading(false);
     }
   };
 
@@ -357,6 +390,11 @@ function EditCompanyProfilePage() {
                     <span className="text-gray-400 text-sm">No Logo</span>
                   </div>
                 )}
+                {isUploading && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
@@ -365,13 +403,13 @@ function EditCompanyProfilePage() {
                   <span>Upload Logo</span>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept=".jpg,.jpeg,.png,.svg"
                     onChange={handleLogoChange}
                     className="hidden"
                   />
                 </label>
 
-                {logoPreview && (
+                {logoPreview && logoPreview !== profile?.logo && (
                   <button
                     type="button"
                     onClick={() => {
@@ -385,9 +423,9 @@ function EditCompanyProfilePage() {
                   </button>
                 )}
               </div>
-
               <p className="text-xs text-gray-500 text-center">
-                Recommended: Square image, at least 200x200 pixels
+                Rekomendasi: gambar persegi, minimal 200x200 piksel. Max ukuran
+                file: 1MB
               </p>
             </div>
           </div>

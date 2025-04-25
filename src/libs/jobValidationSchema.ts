@@ -24,7 +24,12 @@ export const jobValidationSchema = Yup.object().shape({
     .oneOf(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP", "REMOTE"])
     .required("Jenis pekerjaan harus diisi"),
   experience: Yup.mixed<ExperienceLevel>()
-    .oneOf(["ENTRY", "MID", "SENIOR", "EXPERT"])
+    .oneOf([
+      ExperienceLevel.ENTRY_LEVEL,
+      ExperienceLevel.MID_LEVEL,
+      ExperienceLevel.SENIOR_LEVEL,
+      ExperienceLevel.EXPERT_LEVEL,
+    ])
     .required("Level pengalaman harus diisi"),
   deadline: Yup.string().required("Deadline harus diisi"),
 });
