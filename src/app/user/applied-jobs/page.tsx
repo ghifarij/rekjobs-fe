@@ -105,9 +105,22 @@ function AppliedJobsPage() {
     };
   }, []);
 
-  const getInterviewStatus = (interviews: Application["interviews"]) => {
+  const getInterviewStatus = (
+    interviews: Application["interviews"],
+    applicationStatus: string
+  ) => {
+    if (applicationStatus === "REJECTED") {
+      return {
+        text: "Lamaran Ditolak",
+        color: "underline text-red-800",
+      };
+    }
+
     if (!interviews || interviews.length === 0) {
-      return { text: "No Interview", color: "underline text-gray-800" };
+      return {
+        text: "Belum ada wawancara",
+        color: "underline text-gray-800",
+      };
     }
 
     const latestInterview = interviews[interviews.length - 1];
@@ -244,7 +257,10 @@ function AppliedJobsPage() {
       ) : (
         <div className="space-y-4 sm:space-y-6">
           {applications.map((application) => {
-            const interviewStatus = getInterviewStatus(application.interviews);
+            const interviewStatus = getInterviewStatus(
+              application.interviews,
+              application.status
+            );
             const latestInterview =
               application.interviews[application.interviews.length - 1];
 
@@ -357,29 +373,29 @@ function AppliedJobsPage() {
                             )}
                           </div>
 
-                          {latestInterview.status === "SCHEDULED" ||
-                            (latestInterview.status === "RESCHEDULED" && (
-                              <div className="flex flex-col sm:flex-row gap-2">
-                                <button
-                                  onClick={() =>
-                                    handleAcceptInterview(latestInterview.id)
-                                  }
-                                  className="flex items-center justify-center gap-1 px-3 py-1 text-xs sm:text-sm text-green-700 rounded border border-green-700 hover:bg-green-50"
-                                >
-                                  <FiCheck className="text-xs sm:text-sm" />
-                                  Terima Wawancara
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handleRescheduleRequest(latestInterview.id)
-                                  }
-                                  className="flex items-center justify-center gap-1 px-3 py-1 text-xs sm:text-sm text-yellow-700 rounded border border-yellow-700 hover:bg-yellow-50"
-                                >
-                                  <FiRefreshCw className="text-xs sm:text-sm" />
-                                  Ajukan Penjadwalan Ulang
-                                </button>
-                              </div>
-                            ))}
+                          {(latestInterview.status === "SCHEDULED" ||
+                            latestInterview.status === "RESCHEDULED") && (
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <button
+                                onClick={() =>
+                                  handleAcceptInterview(latestInterview.id)
+                                }
+                                className="flex items-center justify-center gap-1 px-3 py-1 text-xs sm:text-sm text-green-700 rounded border border-green-700 hover:bg-green-50"
+                              >
+                                <FiCheck className="text-xs sm:text-sm" />
+                                Terima Wawancara
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleRescheduleRequest(latestInterview.id)
+                                }
+                                className="flex items-center justify-center gap-1 px-3 py-1 text-xs sm:text-sm text-yellow-700 rounded border border-yellow-700 hover:bg-yellow-50"
+                              >
+                                <FiRefreshCw className="text-xs sm:text-sm" />
+                                Ajukan Penjadwalan Ulang
+                              </button>
+                            </div>
+                          )}
                         </>
                       )}
                     </div>
