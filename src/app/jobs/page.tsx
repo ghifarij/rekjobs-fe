@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { jobAPI } from "@/services/job";
 import { userApplicationAPI } from "@/services/userApplication";
@@ -41,6 +41,23 @@ function JobsPage() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const selectedSlugRef = useRef<string | null>(null);
+
+  // Track last replaced URL to avoid redundant updates in dev
+  const lastUrlRef = useRef<string | null>(null);
+
+  // Update the URL without triggering a Next.js navigation (prevents RSC refresh)
+  const replaceUrl = useCallback((q: string, jobSlug?: string) => {
+    if (typeof window === "undefined") return;
+    const searchParam = q ? `search=${encodeURIComponent(q)}` : "";
+    const jobParam = jobSlug ? `job=${encodeURIComponent(jobSlug)}` : "";
+    const qs = [searchParam, jobParam].filter(Boolean).join("&");
+    const target = qs ? `/jobs?${qs}` : "/jobs";
+    const current = window.location.pathname + window.location.search;
+    if (current === target || lastUrlRef.current === target) return;
+    window.history.replaceState(null, "", target);
+    lastUrlRef.current = target;
+  }, []);
 
   // Replace the debouncedFetchJobs with a regular fetch function
   const fetchJobs = useCallback(
@@ -61,21 +78,36 @@ function JobsPage() {
         // 3. Filter out the ones already applied
         const available = list.filter((job) => !appliedIds.has(job.id));
 
-        // 4. Now set the jobs and run your "select first or slug" logic
+        // 4. Now set the jobs and run selection logic
         setJobs(available);
 
-        const found = available.find((j) => j.slug === urlJobSlug);
-        if (found) {
-          setSelectedJob(found);
-        } else if (available.length) {
-          const first = available[0];
-          setSelectedJob(first);
-          const searchParam = q ? `search=${encodeURIComponent(q)}&` : "";
-          router.replace(`/jobs?${searchParam}job=${first.slug}`, {
-            scroll: false,
-          });
+        // Prefer keeping the user's current selection if it still exists
+        const currentSlug = selectedSlugRef.current;
+        const keep = currentSlug
+          ? available.find((j) => j.slug === currentSlug)
+          : undefined;
+        if (keep) {
+          setSelectedJob(keep);
+          replaceUrl(q, keep.slug);
         } else {
-          setSelectedJob(null);
+          // Else, try URL slug, else first available
+          const foundByUrl = urlJobSlug
+            ? available.find((j) => j.slug === urlJobSlug)
+            : undefined;
+          if (foundByUrl) {
+            setSelectedJob(foundByUrl);
+            selectedSlugRef.current = foundByUrl.slug;
+            replaceUrl(q, foundByUrl.slug);
+          } else if (available.length) {
+            const first = available[0];
+            setSelectedJob(first);
+            selectedSlugRef.current = first.slug;
+            replaceUrl(q, first.slug);
+          } else {
+            setSelectedJob(null);
+            selectedSlugRef.current = null;
+            replaceUrl(q);
+          }
         }
 
         setError(null);
@@ -86,21 +118,20 @@ function JobsPage() {
         setLoading(false);
       }
     },
-    [urlJobSlug, router]
+    [urlJobSlug, replaceUrl]
   );
 
   // Handle search submission
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setSearchQuery(tempSearch);
-    fetchJobs(tempSearch);
   };
 
   // Add clear search handler
   const handleClearSearch = () => {
     setTempSearch("");
     setSearchQuery("");
-    router.replace("/jobs", { scroll: false });
+    replaceUrl("");
   };
 
   // Remove the applied jobs effect
@@ -111,16 +142,12 @@ function JobsPage() {
   // Keep the original handleJobSelect function
   const handleJobSelect = (job: Job) => {
     setSelectedJob(job);
-    router.push(
-      `/jobs?search=${encodeURIComponent(searchQuery)}&job=${job.slug}`,
-      { scroll: false }
-    );
+    selectedSlugRef.current = job.slug;
+    replaceUrl(searchQuery, job.slug);
   };
 
-  // Keep the search box in sync if someone navigates history
-  useEffect(() => {
-    setSearchQuery(urlSearch);
-  }, [urlSearch]);
+  // Keep the search box in sync from initial URL only; further URL updates
+  // are handled via replaceUrl without navigation.
 
   // render states
   if (loading && jobs.length === 0) {
